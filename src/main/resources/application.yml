@@ -1,0 +1,57 @@
+server:
+  port: 8084
+spring:
+  application:
+    name: ddd-sales
+  zipkin:
+    base-url: http://ec2-34-219-190-76.us-west-2.compute.amazonaws.com:9411
+  sleuth:
+    sampler:
+      probability: 1.0
+    enabled: true
+  kafka:
+    bootstrap-servers: ec2-34-219-190-76.us-west-2.compute.amazonaws.com:9092
+    properties:
+      security:
+        protocol: PLAINTEXT
+      sasl:
+        mechanism: PLAIN
+        jaas:
+          config: org.apache.kafka.common.security.plain.PlainLoginModule required username="alice" password="alice-secret";
+    consumer:
+      group-id: sales
+      key-serializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-serializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: latest
+      enable-auto-commit:  true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      retries: 3
+      transaction-id-prefix: sales
+      properties:
+        enable:
+          idempotence: true
+        transactional:
+          id: sales
+
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=Oracle
+    driverClassName: org.h2.Driver
+    username: qualidade
+
+  jpa:
+    generate-ddl: true
+    show-sql: false
+    hibernate:
+      ddl-auto: create
+    database-platform: org.hibernate.dialect.H2Dialect
+
+app:
+  topic: sales
+  topicError: sales_error
+
+
+product:
+  url: "http://localhost:8083/products/id_product"
+
